@@ -1,0 +1,61 @@
+<script>
+	const model =
+		{
+		"name": "CC_PartialEnv",
+		"objects": [
+			{
+				"name": "User",
+				"isActor": "true",
+				"behavior": `
+					[*] --> Idle
+					Idle: [value>0]/value--;
+					Idle: [value<250]/value++;
+					Idle: /System.send(value)
+				`,
+				"features": `
+					value : int
+				`,
+			},
+			{
+				"name": "System",
+				"behavior": `
+					[*] --> Waiting
+					Waiting: send(s)/value=s
+					Waiting --> BreakpointState: [value>200]
+
+				`,
+				"features": `
+					value : int
+				`,
+			},
+
+		],
+		connectorByName: {
+			User2System: {},
+		},
+		watchExpressions: {
+			b_breakpointState: "IS_IN_STATE(System, System.BreakpointState)",
+			c_Hash: "__builtin__.digest('SHA-256', __builtin__.jsonConfig, 32).then(n => n.toString());",
+			c_Config: "__builtin__.config",
+			p_EnvvalueIs0: "__builtin__.config.objectState.User.value + \"\" == \"undefined\"",
+			p_CtrlvalueIs0: "__builtin__.config.objectState.System.value + \"\" == \"undefined\"",
+			p_EnvDifCtrl: "(p_EnvvalueIs0 ? 0 : __builtin__.config.objectState.User.value) != (p_CtrlvalueIs0 ? 0 : __builtin__.config.objectState.System.value)",
+			p_EnvInfCtrl: "(p_EnvvalueIs0 ? 0 : __builtin__.config.objectState.User.value) < (p_CtrlvalueIs0 ? 0 : __builtin__.config.objectState.System.value)",
+			p_EnvSupCtrl: "(p_EnvvalueIs0 ? 0 : __builtin__.config.objectState.User.value) > (p_CtrlvalueIs0 ? 0 : __builtin__.config.objectState.System.value)",
+			c_Abstraction1: "__builtin__.JSON.stringify(__builtin__.config.currentState) + \", CC_EP: \" + __builtin__.JSON.stringify(__builtin__.config.objectState.System.__EP__) +\", Env_value: \" + __builtin__.config.objectState.User.value + p_EnvInfCtrl + p_EnvSupCtrl",
+			p_EpvalueEmpty: "EP_IS_EMPTY(System)",
+			p_ctlrvalueSpecificValue: "(p_CtrlvalueIs0 ? 0 : __builtin__.config.objectState.System.value) > 200",
+			c_Abstraction2: "__builtin__.JSON.stringify(__builtin__.config.currentState) +  __builtin__.config.objectState.User.value + p_EpvalueEmpty + p_ctlrvalueSpecificValue",
+    	},
+		"settings": {
+    		"semantics": {
+      		"reactiveSystem": true,
+    		},
+		},
+	}
+	;
+	document.write(`
+		<iframe width="100%" height="100%" src='https://animuml20220518.kher.nl/AnimUML.html#${encodeURIComponent(JSON.stringify(model)).replace(/'/g, '%27')}'></iframe>
+	`);
+</script>
+

@@ -1,0 +1,157 @@
+<script>
+	const model =
+		{
+			name: "Imported_AetBBakery",
+			objects: [
+				{
+					name: "processA",
+					behavior: String.raw`
+						
+						state "NonCritical" as NonCritical {
+						}
+						state "Waiting" as Waiting {
+						}
+						state "Critical" as Critical {
+						}
+						[*] -> NonCritical as "init2NonCritical_1" :    / 
+						NonCritical -> Waiting as "NonCritical2Waiting_1" : / this.ticketA = ((processB.ticketB+"" === \n "undefined") ? 0 : processB.ticketB) + 1;
+						Waiting -> Critical as "Waiting2Critical_1" :   [(processB.ticketB+"" === "undefined") || \n (this.ticketA < processB.ticketB)] / CounterCS++
+						Critical -> NonCritical as "Critical2NonCritical_1" :    / this.ticketA = 0;
+					`,
+					features: String.raw`
+						ticketA : int
+						CounterCS : int
+					`,
+				},
+				{
+					name: "processB",
+					behavior: String.raw`
+						
+						state "NonCritical" as NonCritical {
+						}
+						state "Waiting" as Waiting {
+						}
+						state "Critical" as Critical {
+						}
+						[*] -> NonCritical as "init2NonCritical_1" :    / 
+						NonCritical -> Waiting as "NonCritical2Waiting_1" :    / this.ticketB = ((processA.ticketA+"" === \n "undefined") ? 0 : processA.ticketA) + 1;
+						Waiting -> Critical as "Waiting2Critical_1" :   [(processA.ticketA+"" === "undefined") || \n (this.ticketB <= processA.ticketA)] / 
+						Critical -> NonCritical as "Critical2NonCritical_1" :    / this.ticketB = 0;
+					`,
+					features: "ticketB : int",
+				},
+			],
+			connectorByName: {
+				processA2processB: {
+					ends: [
+						"processA",
+						"processB",
+					],
+				},
+			},
+			watchExpressions: {
+				stateA: "__builtin__.config.currentState.processA",
+				stateB: "__builtin__.config.currentState.processB",
+				p_Ais0: "__builtin__.config.objectState.processA.ticketA + \"\" == \"undefined\"",
+				p_Bis0: "__builtin__.config.objectState.processB.ticketB + \"\" == \"undefined\"",
+				p_AinfB: "(p_Ais0 ? false : __builtin__.config.objectState.processA.ticketA) < (p_Bis0 ? false : __builtin__.config.objectState.processB.ticketB)",
+			},
+			settings: {
+				interface: {
+					mainWidth: "50%",
+					histWidth: "50%",
+					displayedObjects: [
+						"processA",
+						"processB",
+					],
+				},
+				display: {
+					hideClasses: false,
+					hideMethods: false,
+					hideOperations: false,
+					hideStateMachines: false,
+					showPseudostateInvariants: false,
+					showPorts: false,
+					showTransitions: false,
+					showEndNames: false,
+					showMethodsAsActivities: true,
+				},
+				semantics: {
+					fireInitialTransitions: true,
+					autoFireAfterChoice: false,
+					autoReceiveDisabled: false,
+					considerGuardsTrue: false,
+					checkEvents: true,
+					keepOneMessagePerTrigger: true,
+					enableEventPools: true,
+					matchFirst: true,
+					symbolicValues: false,
+					reactiveSystem: true,
+					synchronousCommunication: false,
+					withDBM: false,
+				},
+			},
+			historyCauses: [
+				"transition:processA.init2NonCritical_1",
+				"transition:processB.init2NonCritical_1",
+				[
+					[
+						"transition:processB.NonCritical2Waiting_1",
+						[
+							[
+								"transition:processB.Waiting2Critical_1",
+								[
+									[
+										"transition:processB.Critical2NonCritical_1",
+									],
+									[
+										"transition:processA.NonCritical2Waiting_1",
+									],
+								],
+							],
+							[
+								"transition:processA.NonCritical2Waiting_1",
+								[
+									[
+									],
+									[
+										"transition:processB.Waiting2Critical_1",
+									],
+								],
+							],
+						],
+					],
+					[
+						"transition:processA.NonCritical2Waiting_1",
+						[
+							[
+								"transition:processB.NonCritical2Waiting_1",
+								[
+									[
+									],
+									[
+										"transition:processA.Waiting2Critical_1",
+									],
+								],
+							],
+							[
+								"transition:processA.Waiting2Critical_1",
+								[
+									[
+										"transition:processB.NonCritical2Waiting_1",
+									],
+									[
+										"transition:processA.Critical2NonCritical_1",
+									],
+								],
+							],
+						],
+					],
+				],
+			],
+		}
+	;
+	document.write(`
+		<iframe width="100%" height="100%" src='https://animuml20220518.kher.nl/AnimUML.html#${encodeURIComponent(JSON.stringify(model)).replace(/'/g, '%27')}'></iframe>
+	`);
+</script>
