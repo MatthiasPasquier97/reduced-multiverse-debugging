@@ -1,0 +1,59 @@
+<script>
+	const model =
+		{
+		"name": "AetBBakery",
+		"objects": [
+			{
+				"name": "processA",
+				"behavior": `
+					[*] --> NonCritical
+					NonCritical --> Waiting : /this.ticketA = ((processB.ticketB+"" === "undefined") ? 0 : processB.ticketB) + 1;
+					Waiting --> Critical : [(processB.ticketB+"" === "undefined") || (this.ticketA < processB.ticketB)] / CounterCS++
+					Critical --> NonCritical : /this.ticketA = 0;
+				`,
+				"features": `
+					ticketA : int
+					CounterCS: int
+				`,
+			},
+			{
+				"name": "processB",
+				"behavior": `
+					[*] --> NonCritical
+					NonCritical --> Waiting : /this.ticketB = ((processA.ticketA+"" === "undefined") ? 0 : processA.ticketA) + 1;
+					Waiting --> Critical : [(processA.ticketA+"" === "undefined") || (this.ticketB <= processA.ticketA)]
+					Critical --> NonCritical : /this.ticketB = 0;
+				`,
+				"features": `
+					ticketB : int
+				`,
+			},
+
+		],
+		connectorByName: {
+			processA2processB: {},
+		},
+		watchExpressions: {
+		b_BothCriticalSection: "IS_IN_STATE(processA, processA.Critical) && IS_IN_STATE(processB, processB.Critical)",
+		b_ticketAValue: "__builtin__.config.objectState.processA.ticketA == 10",
+		b_CntrAValue: "__builtin__.config.objectState.processA.CounterCS == 10",
+		c_Hash: "__builtin__.digest('SHA-256', __builtin__.jsonConfig, 16).then(n => n.toString());", 
+		p_Ais0: "__builtin__.config.objectState.processA.ticketA + \"\" == \"undefined\"",
+		p_Bis0: "__builtin__.config.objectState.processB.ticketB + \"\" == \"undefined\"",
+		p_AinfB: "(p_Ais0 ? false : __builtin__.config.objectState.processA.ticketA) < (p_Bis0 ? false : __builtin__.config.objectState.processB.ticketB)",
+		c_NoStateAbstraction: "\"\" + p_Ais0 + p_bis0 + p_AinfB",
+		c_PartialAbstraction: "__builtin__.JSON.stringify(__builtin__.config.currentState) + p_Ais0 + p_bis0",
+		c_FullAbstraction: "__builtin__.JSON.stringify(__builtin__.config.currentState) + p_Ais0 + p_bis0 + p_AinfB",
+    },
+		"settings": {
+    		"semantics": {
+      		"reactiveSystem": true,
+			"fireInitialTransitions": true,
+    		},
+		},
+	}
+	;
+	document.write(`
+		<iframe width="100%" height="100%" src='https://418252c5e69e7fe6c6c1e4aedba4dafe.kher.nl/AnimUML.html#${encodeURIComponent(JSON.stringify(model)).replace(/'/g, '%27')}'></iframe>
+	`);
+</script>
