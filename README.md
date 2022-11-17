@@ -1,5 +1,5 @@
 # reduced-multiverse-debugging
-This is the additional material for the article "Practical Multiverse Debugging through User-defined Reductions" submitted to Models 2022.
+This is the additional material for the article "Practical Multiverse Debugging through User-defined Reductions" submitted to Models 2022 https://dl.acm.org/doi/10.1145/3550355.3552447 .
 
 It includes the complete Lean formalization of our debugger semantics under “reduced-multiverse-debugging_less_types.lean”.
 
